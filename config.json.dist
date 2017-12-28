@@ -1,0 +1,37 @@
+{ "options": {
+    "proxy": "http://10.10.10.10.3128",
+    "timeout": 10,
+    "frequency": 15,
+    "loglevel": "DEBUG",
+    "services": {
+      "zabbix": {
+        "server": "192.168.10.180",
+        "host": "watcher.srvpm.ru"
+      }
+    }
+  },
+  "resources": {
+    "https://www.yandex.ru": {
+      "type": "GET",
+      "url": "https://www.yandex.ru",
+      "expected_text": "Яндекс",
+      "expected_code": 200,
+      "use_proxy": false
+    },
+    "https://www.mail.ru": {
+      "type": "GET",
+      "url": "https://www.mail.ru",
+      "expected_text": "Почта Mail.Ru",
+      "expected_code": 200,
+      "use_proxy": false
+    },
+    "https://yahoo.co.jp": {
+      "type": "GET",
+      "url": "https://yahoo.co.jp",
+      "expected_text": "メールアドレスを取得",
+      "expected_code": 200,
+      "data": "",
+      "use_proxy": false
+    }
+  }
+}
