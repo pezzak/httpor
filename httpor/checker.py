@@ -1,10 +1,14 @@
 import time
 import aiohttp
 import asyncio
-from helper import logger, config, statuses
-from sender import Sender
-from utils import get_enabled_services, get_status_name
 import json
+
+from httpor.helper import config, statuses
+from httpor.sender import Sender
+from httpor.utils import get_enabled_services, get_status_name
+from httpor.logger import getLogger
+
+logger = getLogger(__name__)
 
 
 class Checker():

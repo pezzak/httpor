@@ -1,11 +1,14 @@
 import asyncio
 import signal
-from checker import Checker
-from helper import config, logger
-from sender import Sender
-from utils import get_enabled_services
+
+from httpor.checker import Checker
+from httpor.helper import config
+from httpor.sender import Sender
+from httpor.utils import get_enabled_services
+from httpor.logger import getLogger
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
+logger = getLogger(name=__name__)
 
 class Server():
     def __init__(self):
@@ -39,5 +42,4 @@ class Server():
         loop.run_until_complete(asyncio.gather(producer_coro, consumer_coro))
         loop.close()
 
-if __name__ == '__main__':
-    server = Server()
+server = Server()

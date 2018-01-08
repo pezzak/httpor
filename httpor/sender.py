@@ -1,6 +1,10 @@
 import json
 import asyncio
-from helper import config, logger
+
+from httpor.helper import config
+from httpor.logger import getLogger
+
+logger = getLogger(__name__)
 
 class Sender():
     def __init__(self, data):

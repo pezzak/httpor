@@ -1,4 +1,4 @@
-from helper import config, statuses
+from httpor.helper import config, statuses
 
 def get_enabled_services():
     return config['options']['services'].keys()
@@ -9,11 +9,11 @@ def get_status_name(code):
         if code == val:
             return key
 
-def init_counter():
-    res = {}
-    for k in config['resources'].keys():
-        res[k] = []
-    return res
+# def init_counter():
+#     res = {}
+#     for k in config['resources'].keys():
+#         res[k] = []
+#     return res
 
-t = init_counter()
+# t = init_counter()
 
