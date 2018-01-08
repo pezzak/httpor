@@ -1,13 +1,20 @@
-{ "options": {
-    "proxy": "http://10.10.10.10.3128",
-    "timeout": 10,
-    "frequency": 15,
-    "loglevel": "DEBUG",
-    "services": {
-      "zabbix": {
-        "server": "192.168.10.180",
-        "host": "watcher.srvpm.ru"
-      }
+{ "proxy": "http://10.10.10.10:3128",
+  "timeout": 10,
+  "frequency": 15,
+  "trigger_threshold": 2,
+  "recover_threshold": 3,
+  "alarm_repeat": 600,
+  "services": {
+    "zabbix": {
+      "server": "127.0.0.1",
+      "host": "superserver.ru"
+    },
+    "slack": {
+      "hook": "https://hooks.slack.com/services/token"
+    },
+    "telegram": {
+      "token": "token",
+      "chat_id": "chat_id"
     }
   },
   "resources": {
@@ -16,7 +23,7 @@
       "url": "https://www.yandex.ru",
       "expected_text": "Яндекс",
       "expected_code": 200,
-      "use_proxy": false
+      "use_proxy": true
     },
     "https://www.mail.ru": {
       "type": "GET",
@@ -26,11 +33,11 @@
       "use_proxy": false
     },
     "https://yahoo.co.jp": {
-      "type": "GET",
+      "type": "POST",
       "url": "https://yahoo.co.jp",
       "expected_text": "メールアドレスを取得",
       "expected_code": 200,
-      "data": "",
+      "data": "login=111",
       "use_proxy": false
     }
   }

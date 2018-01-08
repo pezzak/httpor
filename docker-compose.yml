@@ -1,0 +1,8 @@
+version: '2'
+services:
+  httpor:
+    image: "pezzak/httpor:latest"
+    volumes:
+      - "./config.json:/opt/app/config.json"
+    restart: "always"
+    network_mode: "host"
