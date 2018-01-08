@@ -1,7 +1,8 @@
-from httpor.helper import config, statuses
+#from httpor.helper import config, statuses
+from httpor.config import config, statuses
 
 def get_enabled_services():
-    return config['options']['services'].keys()
+    return config.services.keys() if config.services else {}
 
 #ugly
 def get_status_name(code):

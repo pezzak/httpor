@@ -1,13 +1,19 @@
+import os
 import logging
 from logging import getLogger
 
-from httpor.helper import config
 
-loglevel = config['options']['loglevel']
+loglevel = os.environ.get('LOGLEVEL', 'INFO')
+
+# if loglevel == 'DEBUG':
+#     logformat = '[{asctime}] [{name}.{funcName}:{lineno}] {levelname:7} {message}'
+# else:
+#     logformat = '[{asctime}] {levelname:7} {message}'
+logformat = '[{asctime}] [{name}.{funcName}:{lineno}] {levelname:7} {message}'
 
 #logger
-logging.basicConfig(level=config['options']['loglevel'],
-                    format='[{asctime}] [{name}.{funcName}:{lineno}] {levelname:7} {message}',
+logging.basicConfig(level=loglevel,
+                    format=logformat,
                     style='{')
 #logger = logging.getLogger()
 

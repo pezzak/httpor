@@ -3,10 +3,11 @@ import aiohttp
 import asyncio
 import json
 
-from httpor.helper import config, statuses
-from httpor.sender import Sender
-from httpor.utils import get_enabled_services, get_status_name
+from httpor.config import config, statuses
+from httpor.utils import get_enabled_services
 from httpor.logger import getLogger
+
+from httpor.senders import ZabbixSender
 
 logger = getLogger(__name__)
 
@@ -20,13 +21,13 @@ class Checker():
         self.expected_code = req_params['expected_code']
         if self.type == 'POST':
             self.data = req_params['data']
-        self.timeout = config['options']['timeout']
-        self.proxy = config['options']['proxy'] if req_params['use_proxy'] else None
+        self.timeout = config.timeout
+        self.proxy = config.proxy
         self.encoding = req_params['encoding'] if 'encoding' in req_params else 'utf-8'
 
 
     async def _request(self):
-        res = {}
+        res = dict()
         t = time.monotonic()
         try:
             async with aiohttp.ClientSession() as session:
@@ -42,15 +43,15 @@ class Checker():
                                             timeout=self.timeout,
                                             encoding=self.encoding) as resp:
                         res['resp_data'] = await resp.text()
-                logger.debug('{} status: {}'.format(self.url, resp.status))
+                logger.debug(f"{self.url} status: {resp.status}")
                 res['resp_status'] = resp.status
                 res['resp_time'] = round(time.monotonic() - t, 3)
-                logger.debug('{} resp time: {} sec'.format(self.url, res['resp_time']))
+                logger.debug(f"{self.url} resp time: {res['resp_time']} sec")
         except asyncio.TimeoutError:
             res['resp_error'] = statuses['ERR_TIMED_OUT']
         except Exception as e:
             res['resp_error'] = statuses['ERR_OTHER']
-            logger.debug('ERR_OTHER: {}'.format(e))
+            logger.error(f"{self.url}: {e}")
         return res
 
 
@@ -60,24 +61,21 @@ class Checker():
         if 'resp_error' in response:
             res['status'] = response['resp_error']
             res['time'] = '-1'
-            logger.info("{}: {}".format(self.url,
-                                      get_status_name(res['status'])))
         else:
             res['time'] = response['resp_time']
-            e_code = config['resources'][self.item]['expected_code']
+            e_code = config.resources[self.item]['expected_code']
             if e_code != response['resp_status']:
                 res['status'] += statuses['ERR_STATUS_CODE']
-                logger.info("{} status: {}".format(self.url,
-                                                   response['resp_status']))
-            e_string = config['resources'][self.item]['expected_text']
+                logger.info(f"{self.url} status: {response['resp_status']}")
+            e_string = config.resources[self.item]['expected_text']
             if e_string not in response['resp_data']:
                 res['status'] += statuses['ERR_STRING_NOT_FOUND']
-                logger.info("{} string not found".format(self.url))
+                logger.info(f"{self.url} expected string not found")
         return res
 
 
     async def check(self):
         response = await self._request()
-        sender = Sender(self._filter(response))
+        data = self._filter(response)
         if 'zabbix' in get_enabled_services():
-            await sender.zabbix(self.item)
+            await ZabbixSender.send_item_data(self.item, data['time'], data['status'])
