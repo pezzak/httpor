@@ -29,6 +29,9 @@ class Config:
     proxy = None
     timeout = None
     frequency = None
+    trigger_threshold = None
+    recover_threshold = None
+    alarm_repeat = None
     services = None
     resources = None
 
@@ -47,6 +50,10 @@ class Config:
 
         Config.proxy = get_param(config, 'proxy')
         Config.timeout = get_param(config, 'timeout', 10)
+        Config.frequency = get_param(config, 'frequency', 15)
+        Config.trigger_threshold = get_param(config, 'trigger_threshold', 2)
+        Config.recover_threshold = get_param(config, 'recover_threshold', 3)
+        Config.alarm_repeat = get_param(config, 'alarm_repeat', 300)
         Config.frequency = get_param(config, 'frequency', 15)
         Config.services = get_param(config, 'services')
         Config.resources = get_param(config, 'resources')

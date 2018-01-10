@@ -1,20 +1,21 @@
-#from httpor.helper import config, statuses
 from httpor.config import config, statuses
 
 def get_enabled_services():
-    return config.services.keys() if config.services else {}
+    return list(config.services.keys()) if config.services else {}
 
-#ugly
 def get_status_name(code):
     for key, val in statuses.items():
         if code == val:
             return key
 
-# def init_counter():
-#     res = {}
-#     for k in config['resources'].keys():
-#         res[k] = []
-#     return res
+alarm_status = dict()
 
-# t = init_counter()
+def init_alarm():
+    if config.resources:
+        for item in config.resources:
+            alarm_status[item] = dict()
+            alarm_status[item]['fail_sent'] = None
+            alarm_status[item]['recover_sent'] = None
+            alarm_status[item]['statuses'] = list()
+
 

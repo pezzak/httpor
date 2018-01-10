@@ -4,13 +4,16 @@ import signal
 from httpor.checker import Checker
 from httpor.config import config
 from httpor.senders.zabbix import ZabbixSender
-from httpor.utils import get_enabled_services
+from httpor.utils import get_enabled_services, init_alarm
 from httpor.logger import getLogger
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 logger = getLogger(name=__name__)
 
 class Server():
+
+    SERVER_VERSION = "0.0.2"
+
     def __init__(self):
         self._server()
 
@@ -33,6 +36,7 @@ class Server():
 
 
     def _server(self):
+        init_alarm()
         loop = asyncio.get_event_loop()
         queue = asyncio.Queue(loop=loop)
         producer_coro = self.produce(queue)
