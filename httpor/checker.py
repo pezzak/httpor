@@ -66,16 +66,17 @@ class Checker():
                                             timeout=self.timeout,
                                             encoding=self.encoding) as resp:
                         res['resp_data'] = await resp.text()
-                logger.debug(f"{self.url} status: {resp.status}")
+                logger.debug(f"{self.item} status: {resp.status}")
                 res['resp_status'] = resp.status
                 res['resp_time'] = round(time.monotonic() - t, 3)
-                logger.debug(f"{self.url} resp time: {res['resp_time']} sec")
+                logger.debug(f"{self.item} resp time: {res['resp_time']} sec")
         except asyncio.TimeoutError:
             res['resp_error'] = statuses['ERR_TIMED_OUT']
+            logger.warn(f"{self.item} ERR_TIMED_OUT")
         except Exception as e:
             res['resp_error'] = statuses['ERR_OTHER']
             res['resp_error_desc'] = e
-            logger.error(f"{self.url}: {e}")
+            logger.warn(f"{self.item}: {e}")
         return res
 
 
@@ -105,11 +106,11 @@ class Checker():
             e_code = config.resources[self.item]['expected_code']
             if e_code != response['resp_status']:
                 res['status'] += statuses['ERR_STATUS_CODE']
-                logger.warn(f"{self.url} status: {response['resp_status']}")
+                logger.warn(f"{self.item} status: {response['resp_status']}")
             e_string = config.resources[self.item]['expected_text']
             if e_string not in response['resp_data']:
                 res['status'] += statuses['ERR_STRING_NOT_FOUND']
-                logger.warn(f"{self.url} expected string not found")
+                logger.warn(f"{self.item} expected string not found")
         return res
 
 
@@ -156,7 +157,7 @@ class Checker():
             #analyze filtered data
             i = alarm_status[self.item]
             i['statuses'].append(data['status'])
-            logger.debug(f"{i} last statuses: {i['statuses']}")
+            logger.debug(f"{self.item}: {i}")
             if data['status'] != 0:
                 if i['statuses'].count(data['status']) >= config.trigger_threshold:
                     if  (

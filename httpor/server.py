@@ -12,7 +12,7 @@ logger = getLogger(name=__name__)
 
 class Server():
 
-    SERVER_VERSION = "0.0.2"
+    SERVER_VERSION = "0.0.3"
 
     def __init__(self):
         self._server()
