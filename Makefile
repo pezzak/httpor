@@ -1,8 +1,7 @@
-VERSION := $(shell cat httpor/server.py | grep -i "SERVER_VERSION =" | cut -d'=' -f2 | tr -d '" \n')
+.PHONY: test
+test:
+	pytest --cov=app
 
-build_docker:
-	find . -path '*/__pycache__/*' -delete
-	find . -type d -name '__pycache__' -empty -delete
-	find . -name '*.pyc' -delete
-	docker build -f Dockerfile -t pezzak/httpor:latest .
-	docker build -f Dockerfile -t pezzak/httpor:${VERSION} .
+.PHONY: testcov
+testcov:
+	pytest --cov=app && (echo "building coverage html, view at './htmlcov/index.html'"; coverage html)
