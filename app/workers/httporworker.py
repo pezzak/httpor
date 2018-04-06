@@ -30,7 +30,7 @@ class HttporWorker():
             resources = await queue.get()
             if 'zabbix' in self.settings.enabled_services:
                 zs = Zabbix_Service(self.settings)
-                await zs.send_alive()
+                asyncio.ensure_future(zs.send_alive())
             if resources:
                 for item, params in resources.items():
                     logger.debug(f"Got item: {item}")

@@ -1,0 +1,20 @@
+---
+proxy: "http://10.10.10.10:3128"
+timeout: 10
+frequency: 15
+trigger_threshold: 2
+recover_threshold: 3
+alarm_repeat: 600
+# services:
+#   zabbix:
+#     server: 127.0.0.1
+#     sender: "/usr/bin/zabbix_sender"
+#     host: "superserver.ru"
+resources:
+  'www.yandex.ru':
+    type: "GET"
+    url: "https://www.yandex.ru"
+    expected_text: "test"
+    expected_code: 200
+    use_proxy: false
+

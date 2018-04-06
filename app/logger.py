@@ -8,7 +8,6 @@ class AppStreamHandler(logging.StreamHandler):
 
     def __init__(self):
         logging.StreamHandler.__init__(self)
-        fmt = '%(asctime)s %(filename)-18s %(levelname)-8s: %(message)s'
         fmt = '[{asctime}] [{name}.{funcName}:{lineno}] {levelname:7} {message}'
         formatter = logging.Formatter(fmt, style='{')
         self.setFormatter(formatter)

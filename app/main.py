@@ -80,7 +80,6 @@ def create_app():
     app = web.Application()
     settings = Settings()
     app.update(
-        name='httpor',
         settings=settings
     )
 

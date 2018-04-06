@@ -1,0 +1,19 @@
+ul {
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+li {
+  padding: 20px;
+  border: 1px solid black;
+  flex: 0 1 25%;
+  box-sizing: border-box;
+  margin: 5px 0;
+}
+
+@media(max-width: 768px) {
+  li {
+    flex: 0 1 33.333%;
+  }
+}

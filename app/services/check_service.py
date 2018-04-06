@@ -148,6 +148,8 @@ class Check_Service():
             await service_obj.send(msg, msg_type)
         logger.info(f"Alarm sent: {msg}")
 
+    async def check1(self):
+        print(123)
 
     async def check(self):
         """
