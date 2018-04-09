@@ -36,11 +36,13 @@ class Check_Service():
         self.timeout = self.settings.timeout
         self.proxy = None
         if 'use_proxy' in self.settings.resources[item]:
-            self.proxy = self.settings.resources[item]['use_proxy']
+            if self.settings.resources[item]['use_proxy']:
+                self.proxy = self.settings.proxy
         self.encoding = 'utf-8'
         if 'encoding' in self.settings.resources[item]:
             self.encoding = self.settings.resources[item]['encoding']
         self.response = None
+
 
     async def _request(self):
         """
@@ -62,19 +64,20 @@ class Check_Service():
         try:
             async with aiohttp.ClientSession() as session:
                 if self.type == 'GET':
-                    async with session.get(self.url,
-                                           proxy=self.proxy,
-                                           timeout=self.timeout) as resp:
-                        res['resp_data'] = await resp.text(encoding=self.encoding)
+                    res['resp_data'], res['resp_status'] = await self._get(session,
+                                                                      self.url,
+                                                                      self.proxy,
+                                                                      self.timeout)
                 if self.type == 'POST':
-                    async with session.post(self.url,
-                                            data=json.loads(self.data),
-                                            proxy=self.proxy,
-                                            timeout=self.timeout,
-                                            encoding=self.encoding) as resp:
-                        res['resp_data'] = await resp.text()
-                logger.debug(f"{self.item} status: {resp.status}")
-                res['resp_status'] = resp.status
+                    data = json.loads(self.data)
+                    res['resp_data'], res['resp_status'] = await self._post(session,
+                                                                        self.url,
+                                                                        self.proxy,
+                                                                        self.timeout,
+                                                                        data,
+                                                                        self.encoding)
+
+                logger.debug(f"{self.item} status: {res['resp_status']}")
                 res['resp_time'] = round(time.monotonic() - t, 3)
                 logger.debug(f"{self.item} resp time: {res['resp_time']} sec")
         except asyncio.TimeoutError:
@@ -148,8 +151,6 @@ class Check_Service():
             await service_obj.send(msg, msg_type)
         logger.info(f"Alarm sent: {msg}")
 
-    async def check1(self):
-        print(123)
 
     async def check(self):
         """
@@ -183,3 +184,14 @@ class Check_Service():
                     if i['fail_sent']:
                         await self.send_alarm(services, data['status'], True)
                         i['fail_sent'] = None
+
+    async def _get(self, session, url, proxy, timeout):
+        async with session.get(url, proxy=proxy, timeout=timeout) as resp:
+            resp_data = await resp.text()
+            return resp_data, resp.status
+
+    async def _post(self, session, url, proxy, timeout, data, encoding):
+        async with session.post(url, proxy=proxy, timeout=timeout,
+                                data=data, encoding=encoding) as resp:
+            resp_data = await resp.text()
+            return resp_data, resp.status

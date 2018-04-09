@@ -39,7 +39,7 @@ class HttporWorker():
 
     def init_alarm(self):
         self.app['alarm_status'] = {}
-        for item in self.settings.resources:
+        for item in self.settings.enabled_resources:
             self.app['alarm_status'][item] = {}
             self.app['alarm_status'][item]['fail_sent'] = None
             self.app['alarm_status'][item]['recover_sent'] = None

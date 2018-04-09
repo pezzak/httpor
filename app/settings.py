@@ -126,6 +126,10 @@ class Settings:
     def enabled_services(self):
         return list(self.services.keys()) if self.services else {}
 
+    @property
+    def enabled_resources(self):
+        return list(self.resources.keys()) if self.resources else {}
+
     def get_status_name(self, code):
         for key, val in self.statuses.items():
             if code == val:
