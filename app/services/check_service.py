@@ -5,6 +5,7 @@ import json
 
 from .alarm_service import Zabbix_Service, ServiceFactory
 from ..logger import appLogger
+from ..utils import time_req
 
 # from httpor.config import config, statuses
 # from httpor.utils import get_enabled_services, alarm_status, get_status_name
@@ -60,26 +61,24 @@ class Check_Service():
             resp_time -- response time
         """
         res = dict()
-        t = time.monotonic()
         try:
             async with aiohttp.ClientSession() as session:
                 if self.type == 'GET':
-                    res['resp_data'], res['resp_status'] = await self._get(session,
-                                                                      self.url,
-                                                                      self.proxy,
-                                                                      self.timeout)
+                    d, s, t = await self._get(session,
+                                              self.url,
+                                              self.proxy,
+                                              self.timeout)
                 if self.type == 'POST':
                     data = json.loads(self.data)
-                    res['resp_data'], res['resp_status'] = await self._post(session,
-                                                                        self.url,
-                                                                        self.proxy,
-                                                                        self.timeout,
-                                                                        data,
-                                                                        self.encoding)
-
+                    d, s, t = await self._post(session,
+                                               self.url,
+                                               self.proxy,
+                                               self.timeout,
+                                               data,
+                                               self.encoding)
+                res['resp_data'], res['resp_status'], res['resp_time'] = d, s, t
                 logger.debug(f"{self.item} status: {res['resp_status']}")
-                res['resp_time'] = round(time.monotonic() - t, 3)
-                logger.debug(f"{self.item} resp time: {res['resp_time']} sec")
+                logger.debug(f"{self.item} resp time: {res['resp_time']} msec")
         except asyncio.TimeoutError:
             res['resp_error'] = self.statuses['ERR_TIMED_OUT']
             logger.warn(f"{self.item} ERR_TIMED_OUT")
@@ -185,13 +184,16 @@ class Check_Service():
                         await self.send_alarm(services, data['status'], True)
                         i['fail_sent'] = None
 
+    @time_req
     async def _get(self, session, url, proxy, timeout):
         async with session.get(url, proxy=proxy, timeout=timeout) as resp:
             resp_data = await resp.text()
             return resp_data, resp.status
 
+    @time_req
     async def _post(self, session, url, proxy, timeout, data, encoding):
         async with session.post(url, proxy=proxy, timeout=timeout,
                                 data=data, encoding=encoding) as resp:
             resp_data = await resp.text()
             return resp_data, resp.status
+

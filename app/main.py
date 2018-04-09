@@ -9,7 +9,7 @@ import aiohttp_session
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from .settings import Settings
-from .views import index
+from .views import index, get_resources
 
 from .workers.httporworker import HttporWorker
 import asyncio
@@ -20,6 +20,7 @@ BASE_DIR = THIS_DIR.parent
 
 def setup_routes(app):
     app.router.add_get('/', index, name='index')
+    app.router.add_get('/get_resources', get_resources)
 
 # async def startup(app: web.Application):
 #     app['httpor_worker'] = 'on'
@@ -80,7 +81,8 @@ def create_app():
     app = web.Application()
     settings = Settings()
     app.update(
-        settings=settings
+        settings=settings,
+        static_root_url='/static'
     )
 
     jinja2_loader = jinja2.FileSystemLoader(str(THIS_DIR / 'templates'))

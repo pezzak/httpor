@@ -1,21 +1,12 @@
-from .settings import statuses
+import time
+from functools import wraps
 
-# def get_enabled_services():
-#     return list(config.services.keys()) if config.services else {}
-
-# def get_status_name(code):
-#     for key, val in statuses.items():
-#         if code == val:
-#             return key
-
-# alarm_status = dict()
-
-# def init_alarm():
-#     if config.resources:
-#         for item in config.resources:
-#             alarm_status[item] = dict()
-#             alarm_status[item]['fail_sent'] = None
-#             alarm_status[item]['recover_sent'] = None
-#             alarm_status[item]['statuses'] = list()
-
-
+def time_req(fn):
+    @wraps(fn)
+    async def wrapped(*args):
+        t = time.monotonic()
+        d, s = await fn(*args)
+        #msec
+        time_delta = int(round(time.monotonic() - t, 3) * 1000)
+        return d, s, time_delta
+    return wrapped

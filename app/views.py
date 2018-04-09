@@ -1,5 +1,5 @@
 from aiohttp_jinja2 import template
-
+import aiohttp
 
 @template('index.jinja')
 async def index(request):
@@ -14,3 +14,7 @@ async def index(request):
         'title': request.app['alarm_status'],
         'intro': "Success! you've setup a basic aiohttp app.",
     }
+
+async def get_resources(request):
+    resources = request.app['settings'].enabled_resources
+    return aiohttp.web.json_response(resources)
