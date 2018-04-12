@@ -1,4 +1,5 @@
 import asyncio
+from collections import deque
 from ..logger import appLogger
 from ..services.alarm_service import Zabbix_Service
 from ..services.check_service import Check_Service
@@ -38,9 +39,12 @@ class HttporWorker():
                     asyncio.ensure_future(host.check())
 
     def init_alarm(self):
-        self.app['alarm_status'] = {}
+        self.app['items'] = {}
         for item in self.settings.enabled_resources:
-            self.app['alarm_status'][item] = {}
-            self.app['alarm_status'][item]['fail_sent'] = None
-            self.app['alarm_status'][item]['recover_sent'] = None
-            self.app['alarm_status'][item]['statuses'] = list()
+            self.app['items'][item] = {}
+            self.app['items'][item]['error'] = False
+            #keep last n events
+            self.app['items'][item]['history'] = deque(maxlen=1000)
+            self.app['items'][item]['fail_sent'] = None
+            self.app['items'][item]['recover_sent'] = None
+            self.app['items'][item]['statuses'] = list()

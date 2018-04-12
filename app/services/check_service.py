@@ -8,7 +8,7 @@ from ..logger import appLogger
 from ..utils import time_req
 
 # from httpor.config import config, statuses
-# from httpor.utils import get_enabled_services, alarm_status, get_status_name
+# from httpor.utils import get_enabled_services, items, get_status_name
 # from httpor.logger import getLogger
 
 # from httpor.senders import ZabbixSender, send_all_services
@@ -130,7 +130,7 @@ class Check_Service():
         status (int): Status code
         recover (bool): Fail or recover alarm
         """
-        i = self.app['alarm_status'][self.item]
+        i = self.app['items'][self.item]
         detail = f"{self.settings.get_status_name(status)}"
         if status == 4:
             detail = detail + f" ({self.response['resp_error_desc']})"
@@ -165,24 +165,24 @@ class Check_Service():
             zs = Zabbix_Service(self.settings)
             await zs.send_item_data(self.item, data['time'], data['status'])
             services.remove('zabbix')
-        if len(services) > 0:
-            #analyze filtered data
-            i = self.app['alarm_status'][self.item]
-            i['statuses'].append(data['status'])
-            logger.debug(f"{self.item}: {i}")
-            if data['status'] != 0:
-                if i['statuses'].count(data['status']) >= cfg.trigger_threshold:
-                    if  (
-                         not i['fail_sent'] or
-                         time.time() - i['fail_sent'] > cfg.alarm_repeat
-                        ):
-                        await self.send_alarm(services, data['status'])
-            else:
-                if i['statuses'][-3:].count(0) >= cfg.recover_threshold:
-                    i['statuses'] = []
-                    if i['fail_sent']:
-                        await self.send_alarm(services, data['status'], True)
-                        i['fail_sent'] = None
+        #analyze filtered data
+        item = self.app['items'][self.item]
+        item['statuses'].append(data['status'])
+        logger.debug(f"{self.item}: {item}")
+        #if status not 0 - check threshold & send alarm
+        if data['status'] != 0:
+            if item['statuses'].count(data['status']) >= cfg.trigger_threshold:
+                if  (
+                     not item['fail_sent'] or
+                     time.time() - item['fail_sent'] > cfg.alarm_repeat
+                    ):
+                    await self.send_alarm(services, data['status'])
+        else:
+            if item['statuses'][-3:].count(0) >= cfg.recover_threshold:
+                item['statuses'] = []
+                if item['fail_sent']:
+                    await self.send_alarm(services, data['status'], True)
+                    item['fail_sent'] = None
 
     @time_req
     async def _get(self, session, url, proxy, timeout):
@@ -197,3 +197,6 @@ class Check_Service():
             resp_data = await resp.text()
             return resp_data, resp.status
 
+#    def _update_history(status_type):
+    #def is_failed():
+    #    return True

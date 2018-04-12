@@ -1,24 +1,31 @@
-const COLORS = ['#FE9', '#9AF', '#F9A', "#AFA", "#FA7"];
+//const COLORS = ['#FE9', '#9AF', '#F9A', "#AFA", "#FA7"];
+const COLORS = ["#0F0"];
+const OK_COLOR = "#0F0";
 
 // var items = '{ "yandex.ru": "Вася", "age": 35, "isAdmin": false, "friends": [0,1,2,3] }';
 const items = ['yandex.ru', 'google.ru', 'wtf.ru'];
 
 function addItem(container, template, id) {
-  let color = COLORS[_.random(COLORS.length - 1)];
+  //let color = COLORS[_.random(COLORS.length - 1)];
+  let color = OK_COLOR;
   let num = _.random(10000);
 
   container.append(Mustache.render(template, {
     color,
-    num
+    id
   }));
 }
 
 $(() => {
-  $.get( "ajax/test.html", function( data ) {
-    $( ".result" ).html( data );
-    alert( "Load was performed." );
-  });
-}
+    const container = $('#app');
+    const tmpl = $('#item_template').html()
+    $.get( "/get_resources", (data) => {
+      for (var i in data) {
+        console.log(data[i])
+        addItem(container, tmpl, data[i])
+      }
+    });
+  }
 )
 
 // $(() => {

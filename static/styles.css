@@ -10,3 +10,31 @@ main {
   background-color: white;
   padding: 20px 20px;
 }
+
+.container {
+  width: 100%;
+  display: grid;
+/*  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(auto-fill, 120px);
+grid-template-columns: 150px 1fr auto;
+grid-template-rows: 50px auto 50px;
+  grid-row-gap: .5em;
+  grid-column-gap: 1em;*/
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.container .item {
+  min-width: 200px;
+  margin: 5px;
+  border: 1px dotted;
+}
+
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.grid .card {
+  min-width: 200px;
+}
