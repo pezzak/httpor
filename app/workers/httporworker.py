@@ -40,11 +40,13 @@ class HttporWorker():
 
     def init_alarm(self):
         self.app['items'] = {}
+        c = self.settings
+        statuses_maxlen = max(c.trigger_threshold, c.recover_threshold) + 1
         for item in self.settings.enabled_resources:
             self.app['items'][item] = {}
-            self.app['items'][item]['error'] = False
+            self.app['items'][item]['failed'] = False
             #keep last n events
             self.app['items'][item]['history'] = deque(maxlen=1000)
             self.app['items'][item]['fail_sent'] = None
             self.app['items'][item]['recover_sent'] = None
-            self.app['items'][item]['statuses'] = list()
+            self.app['items'][item]['statuses'] = deque(maxlen=statuses_maxlen)

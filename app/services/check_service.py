@@ -5,7 +5,8 @@ import json
 
 from .alarm_service import Zabbix_Service, ServiceFactory
 from ..logger import appLogger
-from ..utils import time_req
+from ..utils import time_req, get_last_from_deque
+from itertools import islice
 
 # from httpor.config import config, statuses
 # from httpor.utils import get_enabled_services, items, get_status_name
@@ -145,6 +146,7 @@ class Check_Service():
             msg = f"Recover: {self.item}"
             msg_type = 'recover'
             i['recover_sent'] = time.time()
+            i['fail_sent'] = None
         for service in services:
             service_obj = ServiceFactory.factory(service, self.settings)
             await service_obj.send(msg, msg_type)
@@ -169,20 +171,16 @@ class Check_Service():
         item = self.app['items'][self.item]
         item['statuses'].append(data['status'])
         logger.debug(f"{self.item}: {item}")
-        #if status not 0 - check threshold & send alarm
-        if data['status'] != 0:
-            if item['statuses'].count(data['status']) >= cfg.trigger_threshold:
-                if  (
-                     not item['fail_sent'] or
-                     time.time() - item['fail_sent'] > cfg.alarm_repeat
-                    ):
-                    await self.send_alarm(services, data['status'])
-        else:
-            if item['statuses'][-3:].count(0) >= cfg.recover_threshold:
-                item['statuses'] = []
-                if item['fail_sent']:
-                    await self.send_alarm(services, data['status'], True)
-                    item['fail_sent'] = None
+        if self._check_failed():
+            if  (
+                 not item['fail_sent'] or
+                 time.time() - item['fail_sent'] > cfg.alarm_repeat
+                ):
+                await self.send_alarm(services, data['status'])
+                item['failed'] = True
+        if self._fail_status and self._check_recovered():
+            await self.send_alarm(services, data['status'], True)
+            item['failed'] = False
 
     @time_req
     async def _get(self, session, url, proxy, timeout):
@@ -197,6 +195,23 @@ class Check_Service():
             resp_data = await resp.text()
             return resp_data, resp.status
 
-#    def _update_history(status_type):
-    #def is_failed():
-    #    return True
+    def _check_failed(self):
+        statuses = self.app['items'][self.item]['statuses']
+        threshold = self.settings.trigger_threshold
+        if len(statuses) >= threshold:
+            last_statuses = get_last_from_deque(statuses, threshold)
+            bad_statuses = [x for x in last_statuses if x != 0]
+            return True if len(bad_statuses) >= threshold else False
+
+    def _check_recovered(self):
+        statuses = self.app['items'][self.item]['statuses']
+        threshold = self.settings.recover_threshold
+        if len(statuses) >= threshold:
+            #ugly
+            #good_statuses = list(islice(statuses,len(statuses)-threshold,threshold+1)).count(0)
+            good_statuses = get_last_from_deque(statuses, threshold).count(0)
+            return True if good_statuses >= threshold else False
+
+    @property
+    def _fail_status(self):
+        return self.app['items'][self.item]['failed']
